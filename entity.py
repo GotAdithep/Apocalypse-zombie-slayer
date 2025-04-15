@@ -4,7 +4,7 @@ class Zombie:
     def __init__(self, x, y, game):
         self.rect = pygame.Rect(x, y, 40, 40)
         self.speed = 3          # Normal zombie speed.
-        self.health = 150       # Increased health.
+        self.health = 150
         self.max_health = 150
         self.game = game
         self.facing_right = True

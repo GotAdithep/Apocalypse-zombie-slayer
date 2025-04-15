@@ -35,6 +35,8 @@ class Game:
         self.RED, self.GREEN, self.WHITE = (255, 0, 0), (0, 255, 0), (255, 255, 255)
         self.big_font = pygame.font.Font(None, 100)
         self.small_font = pygame.font.Font(None, 36)
+        # Create an extra small font for the "Press Tab..." and bonus texts
+        self.extra_small_font = pygame.font.Font(None, 24)
 
         self.player = Player(400, 300, self)
         self.zombies = []
@@ -46,7 +48,6 @@ class Game:
         self.zombies_killed = 0
         self.coin_count = 0
         self.loot_pickup_count = 0
-
 
         self.spawn_interval = 60
         self.current_level = 0
@@ -147,6 +148,20 @@ class Game:
         enhance_text = self.small_font.render(f"Enhance Points: {self.player.enhance_points}", True, self.WHITE)
         self.screen.blit(enhance_text, (self.SCREEN_WIDTH - enhance_text.get_width() - 10, 130))
         
+        shop_instr = self.extra_small_font.render("Press Tab to Open Shop", True, self.WHITE)
+        self.screen.blit(shop_instr, (10, self.SCREEN_HEIGHT - shop_instr.get_height() - 10))
+        
+        bonus = 0
+        if self.player.weapon.base_upgrade_applied:
+            bonus += 50
+        if self.player.weapon.stackable_upgrade_applied:
+            bonus += 100
+        bonus_text_str = f"Weapon Size: +{bonus}%"
+        bonus_text = self.extra_small_font.render(bonus_text_str, True, self.WHITE)
+        bonus_x = (self.SCREEN_WIDTH - bonus_text.get_width()) // 2
+        bonus_y = self.SCREEN_HEIGHT - 50
+        self.screen.blit(bonus_text, (bonus_x, bonus_y))
+        
         if self.game_over:
             game_over_text = self.big_font.render("Game Over", True, self.RED)
             restart_text = self.big_font.render("Press R to Restart", True, self.WHITE)
@@ -154,10 +169,8 @@ class Game:
                                               self.SCREEN_HEIGHT // 2 - game_over_text.get_height()))
             self.screen.blit(restart_text, (self.SCREEN_WIDTH // 2 - restart_text.get_width() // 2,
                                             self.SCREEN_HEIGHT // 2 + 20))
-        else:
-            shop_instr = self.small_font.render("Press Tab to Open Shop", True, self.WHITE)
-            self.screen.blit(shop_instr, (10, self.SCREEN_HEIGHT - shop_instr.get_height() - 10))
-        
+
+        # Draw buff icons and timers.
         current_time = pygame.time.get_ticks()
         buff_margin = 10
         x_attack = self.SCREEN_WIDTH - self.attack_buff_img.get_width() - buff_margin

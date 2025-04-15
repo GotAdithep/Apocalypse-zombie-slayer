@@ -44,7 +44,8 @@ class Shop:
         overlay.set_alpha(220)
         overlay.fill((30, 30, 30))
         self.screen.blit(overlay, (0, 0))
-
+        
+        # Draw the shop.
         panel_width = self.width - 100
         panel_height = self.height - 100
         panel_x = 50
@@ -52,34 +53,39 @@ class Shop:
         pygame.draw.rect(self.screen, (50, 50, 50), (panel_x, panel_y, panel_width, panel_height))
         pygame.draw.rect(self.screen, (255, 255, 0), (panel_x, panel_y, panel_width, panel_height), 3)
         
+        # Draw the shop title.
         title = self.title_font.render("SHOP", True, (255, 215, 0))
         self.screen.blit(title, (self.width // 2 - title.get_width() // 2, panel_y + 20))
         
         base_y = panel_y + 120
         item_spacing = 80
         
-        # Item 1 Attack Buff.
+        # Item 1: Attack Buff.
         self.screen.blit(self.attack_buff_img, (panel_x + 50, base_y))
         item1_text = self.font.render("1: Increase Attack by 50% for 1 min - 400 coins", True, (255, 255, 255))
         self.screen.blit(item1_text, (panel_x + 120, base_y + 10))
         
-        # Item 2 Speed Buff.
+        # Item 2: Speed Buff.
         self.screen.blit(self.speed_buff_img, (panel_x + 50, base_y + item_spacing))
         item2_text = self.font.render("2: Increase Speed by 50% for 1 min - 400 coins", True, (255, 255, 255))
         self.screen.blit(item2_text, (panel_x + 120, base_y + item_spacing + 10))
         
-        # Item 3 Bigger Weapon & Range +50%.
+        # Item 3: Bigger Weapon & Range +50%.
         item3_text = self.font.render("3: Bigger Weapon & Range +50% - 500 coins", True, (255, 255, 255))
         self.screen.blit(item3_text, (panel_x + 50, base_y + item_spacing * 2 + 10))
+        # Show "Bought" or "Unbought" for Item 3 
+        item3_status = "Bought" if self.game.player.weapon.base_upgrade_applied else "Unbought"
+        item3_status_text = self.font.render(item3_status, True, (0, 255, 0) if item3_status == "Bought" else (255, 0, 0))
+        self.screen.blit(item3_status_text, (panel_x + 600, base_y + item_spacing * 2 + 10))
         
-        # Item 4 Bigger Weapon & Range +100%.
+        # Item 4: Bigger Weapon & Range +100%.
         item4_text = self.font.render("4: Bigger Weapon & Range +100% - 1000 coins", True, (255, 255, 255))
         self.screen.blit(item4_text, (panel_x + 50, base_y + item_spacing * 3 + 10))
+        # Show "Bought" or "Unbought" for Item 4 
+        item4_status = "Bought" if self.game.player.weapon.stackable_upgrade_applied else "Unbought"
+        item4_status_text = self.font.render(item4_status, True, (0, 255, 0) if item4_status == "Bought" else (255, 0, 0))
+        self.screen.blit(item4_status_text, (panel_x + 600, base_y + item_spacing * 3 + 10))
         
-        # Display coin count.
         coin_text = self.font.render(f"Coins: {self.game.coin_count}", True, (173, 216, 230))
-        self.screen.blit(
-            coin_text,
-            (panel_x + panel_width - coin_text.get_width() - 20, 
-             panel_y + panel_height - coin_text.get_height() - 20)
-        )
+        self.screen.blit(coin_text, (panel_x + panel_width - coin_text.get_width() - 20, 
+                                      panel_y + panel_height - coin_text.get_height() - 20))
