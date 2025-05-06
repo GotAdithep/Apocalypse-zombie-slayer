@@ -1,9 +1,10 @@
 import pygame
+import math
 
 class Zombie:
     def __init__(self, x, y, game):
         self.rect = pygame.Rect(x, y, 40, 40)
-        self.speed = 3          # Normal zombie speed.
+        self.speed = 3
         self.health = 150
         self.max_health = 150
         self.game = game
@@ -31,11 +32,11 @@ class Zombie:
         health_bar_width = 40
         health_ratio = self.health / self.max_health
         pygame.draw.rect(
-            screen, self.game.RED, 
+            screen, self.game.RED,
             (self.rect.x - camera_x, self.rect.y - 10 - camera_y, health_bar_width, 5)
         )
         pygame.draw.rect(
-            screen, self.game.GREEN, 
+            screen, self.game.GREEN,
             (self.rect.x - camera_x, self.rect.y - 10 - camera_y, int(health_bar_width * health_ratio), 5)
         )
 
@@ -45,6 +46,7 @@ class Zombie:
             image_to_draw = pygame.transform.flip(self.game.zombie_img, True, False)
         screen.blit(image_to_draw, (self.rect.x - camera_x, self.rect.y - camera_y))
         self.draw_health_bar(screen, camera_x, camera_y)
+
 
 class SpeedyZombie(Zombie):
     def __init__(self, x, y, game):
@@ -60,6 +62,7 @@ class SpeedyZombie(Zombie):
         screen.blit(image_to_draw, (self.rect.x - camera_x, self.rect.y - camera_y))
         self.draw_health_bar(screen, camera_x, camera_y)
 
+
 class TankyZombie(Zombie):
     def __init__(self, x, y, game):
         super().__init__(x, y, game)
@@ -74,13 +77,14 @@ class TankyZombie(Zombie):
         screen.blit(image_to_draw, (self.rect.x - camera_x, self.rect.y - camera_y))
         self.draw_health_bar(screen, camera_x, camera_y)
 
+
 class SpitterZombie(Zombie):
     def __init__(self, x, y, game):
         super().__init__(x, y, game)
         self.health = 100
         self.max_health = 100
         self.speed = 3
-        self.attack_cooldown = 2000
+        self.attack_cooldown = 4000
         self.last_attack_time = 0
         self.attack_range = 400
         self.image = self.game.splitter_img
@@ -129,6 +133,44 @@ class SpitterZombie(Zombie):
             image_to_draw = pygame.transform.flip(self.image, True, False)
         screen.blit(image_to_draw, (self.rect.x - camera_x, self.rect.y - camera_y))
         self.draw_health_bar(screen, camera_x, camera_y)
+
+
+class KingZombie(Zombie):
+    def __init__(self, x, y, game):
+        super().__init__(x, y, game)
+        self.speed = 1
+        self.health = 1000
+        self.max_health = 1000
+        self.attack_cooldown = 4000
+        self.last_attack_time = 0
+        self.image = pygame.image.load("pictures/king_zombie.png")
+        self.image = pygame.transform.scale(self.image, (60, 60))
+
+    def move_towards(self, player):
+        super().move_towards(player)
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_attack_time >= self.attack_cooldown:
+            self.shoot_projectiles()
+            self.last_attack_time = current_time
+
+    def shoot_projectiles(self):
+        for angle in range(0, 360, 45):
+            rad = math.radians(angle)
+            target_x = self.rect.centerx + 100 * math.cos(rad)
+            target_y = self.rect.centery + 100 * math.sin(rad)
+            projectile = Projectile(
+                self.rect.centerx, self.rect.centery,
+                (target_x, target_y), self.game
+            )
+            self.game.projectiles.append(projectile)
+
+    def draw(self, screen, camera_x, camera_y):
+        image_to_draw = self.image
+        if self.game.player.rect.x < self.rect.x:
+            image_to_draw = pygame.transform.flip(self.image, True, False)
+        screen.blit(image_to_draw, (self.rect.x - camera_x, self.rect.y - camera_y))
+        self.draw_health_bar(screen, camera_x, camera_y)
+
 
 class Projectile:
     def __init__(self, x, y, target, game):

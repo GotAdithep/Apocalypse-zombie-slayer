@@ -1,6 +1,6 @@
 import pygame
 import random
-from entity import Zombie, SpeedyZombie, TankyZombie, SpitterZombie, Projectile
+from entity import Zombie, SpeedyZombie, TankyZombie, SpitterZombie, KingZombie, Projectile
 from player import Player
 
 class Game:
@@ -23,12 +23,12 @@ class Game:
         self.bat_img = pygame.transform.scale(self.bat_img, (60, 30))
         self.health_box_img = pygame.image.load("pictures/health_box.png")
         self.health_box_img = pygame.transform.scale(self.health_box_img, (50, 50))
-        
+
         self.attack_buff_img = pygame.image.load("pictures/attack_buff.png")
         self.attack_buff_img = pygame.transform.scale(self.attack_buff_img, (50, 50))
         self.speed_buff_img = pygame.image.load("pictures/speed_buff.webp")
         self.speed_buff_img = pygame.transform.scale(self.speed_buff_img, (50, 50))
-        
+
         self.splitter_img = pygame.image.load("pictures/splitter.webp")
         self.splitter_img = pygame.transform.scale(self.splitter_img, (40, 40))
 
@@ -51,12 +51,9 @@ class Game:
         self.spawn_interval = 60
         self.current_level = 0
 
-        # Track the starting time of the game (in milliseconds)
         self.start_time = pygame.time.get_ticks()
-        # This will store the final time survived when the game ends
         self.final_time = None
-        
-        # Flag for whether the Skill Tree screen is active.
+
         self.skill_tree_active = False
 
     def update(self):
@@ -106,6 +103,18 @@ class Game:
                     ))
                 self.zombie_spawn_timer = 0
 
+            desired_king_count = self.zombies_killed // 50
+            current_king_count = sum(1 for z in self.zombies if isinstance(z, KingZombie))
+            if current_king_count < desired_king_count:
+                num_to_spawn = desired_king_count - current_king_count
+                for _ in range(num_to_spawn):
+                    king_zombie = KingZombie(
+                        random.randint(0, self.WORLD_WIDTH - 60),
+                        random.randint(0, self.WORLD_HEIGHT - 60),
+                        self
+                    )
+                    self.zombies.append(king_zombie)
+
             new_level = self.zombies_killed // 20
             if new_level > self.current_level:
                 self.spawn_interval = max(20, self.spawn_interval - 5)
@@ -119,7 +128,6 @@ class Game:
 
         if self.player.health <= 0:
             self.game_over = True
-            # Freeze the final time if not already set.
             if self.final_time is None:
                 self.final_time = pygame.time.get_ticks() - self.start_time
 
@@ -128,7 +136,7 @@ class Game:
         camera_y = self.player.rect.y - self.SCREEN_HEIGHT // 2
         camera_x = max(0, min(camera_x, self.WORLD_WIDTH - self.SCREEN_WIDTH))
         camera_y = max(0, min(camera_y, self.WORLD_HEIGHT - self.SCREEN_HEIGHT))
-        
+
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.background, (-camera_x, -camera_y))
         self.player.draw(self.screen, camera_x, camera_y)
@@ -138,7 +146,6 @@ class Game:
         for projectile in self.projectiles:
             projectile.draw(self.screen, camera_x, camera_y)
 
-        # HUD: Display information in the top-right.
         zombie_count_text = self.small_font.render(f"Zombies: {len(self.zombies)}", True, self.WHITE)
         zombies_killed_text = self.small_font.render(f"Eliminated: {self.zombies_killed}", True, self.WHITE)
         coin_count_text = self.small_font.render(f"Coins: {self.coin_count}", True, self.WHITE)
@@ -148,7 +155,6 @@ class Game:
         self.screen.blit(coin_count_text, (self.SCREEN_WIDTH - coin_count_text.get_width() - 10, 70))
         self.screen.blit(loot_pickup_text, (self.SCREEN_WIDTH - loot_pickup_text.get_width() - 10, 100))
 
-        # Experience bar and Enhance Points.
         exp_bar_width = 200
         exp_bar_height = 10
         exp_percentage = (self.player.exp / self.player.next_level_exp) if self.player.next_level_exp > 0 else 0
@@ -160,22 +166,20 @@ class Game:
         enhance_text = self.small_font.render(f"Enhance Points: {self.player.enhance_points}", True, self.WHITE)
         self.screen.blit(enhance_text, (self.SCREEN_WIDTH - enhance_text.get_width() - 10, 130))
 
-        # Display Time Survived.
         if self.game_over and self.final_time is not None:
             elapsed = self.final_time / 1000
         else:
             elapsed = (pygame.time.get_ticks() - self.start_time) / 1000
         time_text = self.small_font.render(f"Time Survived: {elapsed:.2f}s", True, self.WHITE)
         self.screen.blit(time_text, (20, 70))
-        
-        # Draw Skill Tree Icon.
+
         skill_tree_icon = pygame.image.load("images/skill_tree.jpg")
         skill_tree_icon = pygame.transform.scale(skill_tree_icon, (80, 80))
         self.screen.blit(skill_tree_icon, (self.SCREEN_WIDTH - 90, 160))
-        
+
         shop_instr = self.extra_small_font.render("Press Tab to Open Shop", True, self.WHITE)
         self.screen.blit(shop_instr, (10, self.SCREEN_HEIGHT - shop_instr.get_height() - 10))
-        
+
         bonus = 0
         if self.player.weapon.base_upgrade_applied:
             bonus += 50
@@ -187,7 +191,6 @@ class Game:
         bonus_y = self.SCREEN_HEIGHT - 50
         self.screen.blit(bonus_text, (bonus_x, bonus_y))
 
-        # --- Draw Buff Icons and Timers in the Lower Right ---
         current_time = pygame.time.get_ticks()
         buff_margin = 10
         x_attack = self.SCREEN_WIDTH - self.attack_buff_img.get_width() - buff_margin
@@ -210,9 +213,6 @@ class Game:
             self.screen.blit(self.speed_buff_img, (x_speed, y_speed))
             self.screen.blit(spd_text, (x_speed - spd_text.get_width() - 5,
                                          y_speed + (self.speed_buff_img.get_height() - spd_text.get_height()) // 2))
-        # -----------------------------------------------------
-
-        # --- Draw Earthquake Cooldown in the Lower Middle (if unlocked) ---
         if self.player.earthquake_unlocked:
             current_time = pygame.time.get_ticks()
             if current_time < self.player.earthquake_cooldown_end:
@@ -221,8 +221,6 @@ class Game:
                 cooldown_time = 0
             earth_text = self.small_font.render("Earthquake Cooldown: " + str(cooldown_time) + "s", True, self.WHITE)
             self.screen.blit(earth_text, ((self.SCREEN_WIDTH - earth_text.get_width()) // 2, self.SCREEN_HEIGHT - 100))
-        # ---------------------------------------------------------------------
-
         if self.game_over:
             game_over_text = self.big_font.render("Game Over", True, self.RED)
             restart_text = self.big_font.render("Press R to Restart", True, self.WHITE)
@@ -233,7 +231,7 @@ class Game:
             time_text_game_over = self.big_font.render(f"Time Survived: {elapsed:.2f}s", True, self.WHITE)
             self.screen.blit(time_text_game_over, (self.SCREEN_WIDTH // 2 - time_text_game_over.get_width() // 2,
                                                    self.SCREEN_HEIGHT // 2 + 20 + restart_text.get_height() + 10))
-            
+
 class LootDrops:
     def __init__(self, game):
         self.game = game

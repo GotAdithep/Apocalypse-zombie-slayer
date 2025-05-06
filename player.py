@@ -78,7 +78,7 @@ class Player:
             self.exp -= self.next_level_exp
             self.level += 1
             self.enhance_points += 1
-            self.next_level_exp = int(self.next_level_exp * 1.2)
+            self.next_level_exp = int(self.next_level_exp * 1.4)
 
     def draw(self, screen, camera_x, camera_y):
         now = pygame.time.get_ticks()
@@ -94,15 +94,13 @@ class Player:
 
         self.weapon.draw(screen, camera_x, camera_y)
 
-        # Draw health bar.
         pygame.draw.rect(screen, self.game.RED, (20, 20, 200, 20))
         pygame.draw.rect(screen, self.game.GREEN, (20, 20, max(0, 2 * self.health), 20))
 
-        # --- Draw Earthquake Effect if Active ---
         if self.earthquake_active:
             current_time = pygame.time.get_ticks()
             elapsed = current_time - self.earthquake_effect_start_time
-            duration = 2000  # effect lasts 2 seconds
+            duration = 3000
             if elapsed > duration:
                 self.earthquake_active = False
             else:
@@ -116,7 +114,7 @@ class Player:
     def activate_earthquake(self, game):
         current_time = pygame.time.get_ticks()
         if self.earthquake_unlocked and current_time >= self.earthquake_cooldown_end:
-            self.earthquake_cooldown_end = current_time + 10000  # 10-second cooldown
+            self.earthquake_cooldown_end = current_time + 10000
             self.earthquake_active = True
             self.earthquake_effect_start_time = current_time
             radius = 300
@@ -185,18 +183,21 @@ class Weapon:
                             loot_drops.drop_health_box(z.rect.x, z.rect.y)
                             zombies.remove(z)
                             game.zombies_killed += 1
-                            if hasattr(z, "speed") and z.speed == 5:  # SpeedyZombie.
-                                game.coin_count += 30
-                                self.owner.add_exp(3)
-                            elif hasattr(z, "speed") and z.speed == 2:  # TankyZombie.
-                                game.coin_count += 1000
+                            if hasattr(z, "is_king") and z.is_king:
+                                game.coin_count += 1500
+                                self.owner.add_exp(20)
+                            elif hasattr(z, "speed") and z.speed == 5:
+                                game.coin_count += 150
+                                self.owner.add_exp(5)
+                            elif hasattr(z, "speed") and z.speed == 2:
+                                game.coin_count += 500
                                 self.owner.add_exp(10)
-                            elif hasattr(z, "attack_range"):  # SpitterZombie.
-                                game.coin_count += 120
+                            elif hasattr(z, "attack_range"):
+                                game.coin_count += 200
                                 self.owner.add_exp(8)
                             else:
                                 game.coin_count += 100
-                                self.owner.add_exp(1)
+                                self.owner.add_exp(3)
 
     def draw(self, screen, camera_x, camera_y):
         direction = self.owner.current_animation
