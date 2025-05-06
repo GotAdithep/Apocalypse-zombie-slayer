@@ -154,6 +154,6 @@ class Projectile:
 
     def draw(self, screen, camera_x, camera_y):
         if not hasattr(Projectile, "bullet_img"):
-            Projectile.bullet_img = pygame.image.load("bullet.png")
+            Projectile.bullet_img = pygame.image.load("pictures/bullet.png")
             Projectile.bullet_img = pygame.transform.scale(Projectile.bullet_img, (30, 30))
         screen.blit(Projectile.bullet_img, (self.rect.x - camera_x, self.rect.y - camera_y))

@@ -1,7 +1,7 @@
 import pygame
 from game_manager import Game
 from shop import Shop
-from entity import Zombie, SpeedyZombie, TankyZombie
+from skill_tree import SkillTree
 
 def main():
     pygame.init()
@@ -12,6 +12,7 @@ def main():
 
     game = Game(screen)
     shop = Shop(screen, game)
+    skill_tree = SkillTree(screen, game)
     
     shop_active = False
     
@@ -23,25 +24,46 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             
+            # Toggle shop using Tab (only if not in Skill Tree mode)
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_TAB:
+                if event.key == pygame.K_TAB and not game.skill_tree_active:
                     shop_active = not shop_active
                 
+                # Restart game on R key if game is over.
                 if event.key == pygame.K_r and game.game_over:
-                    game = Game(screen)         
+                    game = Game(screen)
                     shop = Shop(screen, game)
+                    skill_tree = SkillTree(screen, game)
                     shop_active = False
+            
+            # Mouse events handling.
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Left click (button 1):
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    # Fixed rectangle for the Skill Tree icon (positioned as drawn in game_manager.py)
+                    skill_tree_rect = pygame.Rect(SCREEN_WIDTH - 90, 160, 80, 80)
+                    if skill_tree_rect.collidepoint(mouse_pos) and not shop_active and not game.skill_tree_active:
+                        game.skill_tree_active = True
+                    # Otherwise, let the player swing their weapon.
+                    elif not shop_active and not game.skill_tree_active:
+                        game.player.weapon.swing()
+                # Right click (button 3): Attempt to activate earthquake skill.
+                elif event.button == 3:
+                    if not shop_active and not game.skill_tree_active:
+                        game.player.activate_earthquake(game)
         
-        if shop_active and not game.game_over:
+        # Route update/draw calls based on current mode.
+        if shop_active:
             shop.update(events)
             shop.draw()
+        elif game.skill_tree_active:
+            skill_tree.update(events)
+            skill_tree.draw()
         else:
-            for event in events:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not shop_active:
-                    game.player.weapon.swing()
             game.update()
             game.draw()
-        
+                
         pygame.display.flip()
         clock.tick(30)
         

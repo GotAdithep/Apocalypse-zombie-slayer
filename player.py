@@ -23,7 +23,7 @@ class Player:
 
         self.moving = False
 
-        self.spritesheet = pygame.image.load("pokemon_sprite.png").convert_alpha()
+        self.spritesheet = pygame.image.load("pictures/pokemon_sprite.png").convert_alpha()
         self.sprite_size = 64
         self.animations = {
             "down": [self.get_sprite(0, i) for i in range(4)],
@@ -35,6 +35,11 @@ class Player:
         self.animation_frame = 0
         self.animation_timer = pygame.time.get_ticks()
 
+        self.earthquake_unlocked = False
+        self.earthquake_cooldown_end = 0
+        self.earthquake_active = False
+        self.earthquake_effect_start_time = 0
+
     def get_sprite(self, row, col):
         x, y = col * self.sprite_size, row * self.sprite_size
         return self.spritesheet.subsurface((x, y, self.sprite_size, self.sprite_size))
@@ -42,7 +47,6 @@ class Player:
     def move(self, keys):
         moved = False
         base_speed = 8
-        # Increase speed while holding shift
         sprint_factor = 1.5 if (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]) else 1.0
         effective_speed = int(base_speed * sprint_factor * self.speed_multiplier)
 
@@ -79,24 +83,54 @@ class Player:
     def draw(self, screen, camera_x, camera_y):
         now = pygame.time.get_ticks()
         if self.moving:
-            # Only animate while moving.
             if now - self.animation_timer > 150:
                 self.animation_frame = (self.animation_frame + 1) % len(self.animations[self.current_animation])
                 self.animation_timer = now
         else:
-            # Not moving.
             self.animation_frame = 0
 
         sprite = self.animations[self.current_animation][self.animation_frame]
         screen.blit(sprite, (self.rect.x - camera_x, self.rect.y - camera_y))
 
-        # Draw weapon
         self.weapon.draw(screen, camera_x, camera_y)
 
-        # Draw health bar
+        # Draw health bar.
         pygame.draw.rect(screen, self.game.RED, (20, 20, 200, 20))
         pygame.draw.rect(screen, self.game.GREEN, (20, 20, max(0, 2 * self.health), 20))
 
+        # --- Draw Earthquake Effect if Active ---
+        if self.earthquake_active:
+            current_time = pygame.time.get_ticks()
+            elapsed = current_time - self.earthquake_effect_start_time
+            duration = 2000  # effect lasts 2 seconds
+            if elapsed > duration:
+                self.earthquake_active = False
+            else:
+                fade_ratio = 1 - (elapsed / duration)
+                earthquake_img = pygame.image.load("images/earthquake.png").convert_alpha()
+                earthquake_img = pygame.transform.scale(earthquake_img, (200, 200))
+                earthquake_img.set_alpha(int(255 * fade_ratio))
+                pos = (self.rect.centerx - 100 - camera_x, self.rect.centery - 100 - camera_y)
+                screen.blit(earthquake_img, pos)
+
+    def activate_earthquake(self, game):
+        current_time = pygame.time.get_ticks()
+        if self.earthquake_unlocked and current_time >= self.earthquake_cooldown_end:
+            self.earthquake_cooldown_end = current_time + 10000  # 10-second cooldown
+            self.earthquake_active = True
+            self.earthquake_effect_start_time = current_time
+            radius = 300
+            for zombie in game.zombies[:]:
+                dx = self.rect.centerx - zombie.rect.centerx
+                dy = self.rect.centery - zombie.rect.centery
+                distance = (dx*dx + dy*dy) ** 0.5
+                if distance <= radius:
+                    zombie.health -= 150
+                    if zombie.health <= 0:
+                        game.zombies.remove(zombie)
+                        game.zombies_killed += 1
+        else:
+            print("Earthquake on cooldown or not unlocked.")
 
 class Weapon:
     def __init__(self, owner):
