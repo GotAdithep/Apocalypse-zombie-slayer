@@ -54,13 +54,12 @@ class Game:
         self.bullet_img = pygame.image.load("pictures/bullet.png")
         self.bullet_img = pygame.transform.scale(self.bullet_img, (30, 30))
         
-        # Colors & Fonts
+        # Colors and Fonts
         self.RED, self.GREEN, self.WHITE = (255, 0, 0), (0, 255, 0), (255, 255, 255)
         self.big_font = pygame.font.Font(None, 100)
         self.small_font = pygame.font.Font(None, 36)
         self.extra_small_font = pygame.font.Font(None, 24)
         
-        # Initialize Player and Other Game Components
         self.player = Player(400, 300, self)
         self.zombies = []
         self.loot_drops = LootDrops(self)

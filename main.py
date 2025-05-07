@@ -1,4 +1,5 @@
 import pygame
+import subprocess
 from game_manager import Game
 from shop import Shop
 from skill_tree import SkillTree
@@ -15,7 +16,7 @@ def main():
     skill_tree = SkillTree(screen, game)
     
     shop_active = False
-    
+
     running = True
     while running:
         events = pygame.event.get()
@@ -23,24 +24,24 @@ def main():
         for event in events:
             if event.type == pygame.QUIT:
                 running = False
-                
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     game.player.attack_count += 1
                     game.player.weapon.swing()
 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_TAB and not game.skill_tree_active:
                     shop_active = not shop_active
-                
 
                 if event.key == pygame.K_r and game.game_over:
                     game = Game(screen)
                     shop = Shop(screen, game)
                     skill_tree = SkillTree(screen, game)
                     shop_active = False
-            
+
+                if event.key == pygame.K_i:
+                    subprocess.call(["python", "data_show.py"])
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -53,7 +54,7 @@ def main():
                 elif event.button == 3:
                     if not shop_active and not game.skill_tree_active:
                         game.player.activate_earthquake(game)
-        
+                        
         if shop_active:
             shop.update(events)
             shop.draw()
@@ -63,7 +64,7 @@ def main():
         else:
             game.update()
             game.draw()
-                
+            
         pygame.display.flip()
         clock.tick(30)
         

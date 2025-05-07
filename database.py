@@ -3,24 +3,23 @@ import csv
 
 class Database:
     def __init__(self, game, file_path="database.csv"):
-        self.game = game                   # Reference to the Game object
-        self.player = game.player          # Reference to the Player object
+        self.game = game 
+        self.player = game.player
 
-        # Ensure the player has an 'attack_count' attribute (if not, initialize it).
         if not hasattr(self.player, 'attack_count'):
             self.player.attack_count = 0
 
-        # Lists to store data every interval (now every 10 seconds)
-        self.damage_taken = []             # Damage values each 10 sec
-        self.coin_collect = []             # Net coin change each 10 sec (if negative, record 0)
-        self.zombie_killed = []            # Number of zombie kills each 10 sec
-        self.player_attack_count = []      # Number of attacks (left clicks) each 10 sec
-        self.zombie_type = []              # Types of zombies killed (recorded immediately per kill)
 
-        self.last_check_time = pygame.time.get_ticks()  # Timer for interval checks
-        self.last_coin_count = game.coin_count          # Coin count at last check
-        self.last_zombie_killed = game.zombies_killed     # Zombie kill count at last check
-        self.last_attack_count = self.player.attack_count # Attack count at last check
+        self.damage_taken = []
+        self.coin_collect = [] 
+        self.zombie_killed = []
+        self.player_attack_count = [] 
+        self.zombie_type = []
+
+        self.last_check_time = pygame.time.get_ticks()
+        self.last_coin_count = game.coin_count
+        self.last_zombie_killed = game.zombies_killed
+        self.last_attack_count = self.player.attack_count
 
         self.file_path = file_path
 
