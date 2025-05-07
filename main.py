@@ -23,6 +23,12 @@ def main():
         for event in events:
             if event.type == pygame.QUIT:
                 running = False
+                
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    game.player.attack_count += 1
+                    game.player.weapon.swing()
+
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_TAB and not game.skill_tree_active:

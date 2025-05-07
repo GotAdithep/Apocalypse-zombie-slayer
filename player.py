@@ -1,5 +1,5 @@
 import pygame
-from entity import SpeedyZombie, TankyZombie
+from entity import SpeedyZombie, TankyZombie  # Import other zombie types as needed
 
 class Player:
     def __init__(self, x, y, game):
@@ -91,7 +91,6 @@ class Player:
 
         sprite = self.animations[self.current_animation][self.animation_frame]
         screen.blit(sprite, (self.rect.x - camera_x, self.rect.y - camera_y))
-
         self.weapon.draw(screen, camera_x, camera_y)
 
         pygame.draw.rect(screen, self.game.RED, (20, 20, 200, 20))
@@ -121,7 +120,7 @@ class Player:
             for zombie in game.zombies[:]:
                 dx = self.rect.centerx - zombie.rect.centerx
                 dy = self.rect.centery - zombie.rect.centery
-                distance = (dx*dx + dy*dy) ** 0.5
+                distance = (dx * dx + dy * dy) ** 0.5
                 if distance <= radius:
                     zombie.health -= 150
                     if zombie.health <= 0:
@@ -183,6 +182,7 @@ class Weapon:
                             loot_drops.drop_health_box(z.rect.x, z.rect.y)
                             zombies.remove(z)
                             game.zombies_killed += 1
+                            self.owner.game.database.register_zombie_kill(z.__class__.__name__)
                             if hasattr(z, "is_king") and z.is_king:
                                 game.coin_count += 1500
                                 self.owner.add_exp(20)
