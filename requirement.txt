@@ -1,5 +1,5 @@
 module pygame>= 2.6.1
 module tkinter>= 8.6.15
 module pandas>= 2.2.3
-module matplotlib
-module seaborn
+module matplotlib>= 3.10.1
+module seaborn>= 0.13.2
