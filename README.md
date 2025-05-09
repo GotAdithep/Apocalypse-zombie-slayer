@@ -6,7 +6,7 @@
 
 3.pandas: python -m pip install pandas
 
-4.seaborn: pyhton -m pip install seabon
+4.seaborn: python -m pip install seaborn
 
 ##  To start my game go to main.py and run the file.
 
