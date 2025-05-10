@@ -35,5 +35,11 @@ press 'r' after lose the game to instantly restart the game
 ## warning
 after you lose the game a new data will replace to the csv file which will cause the information to change. So if you lose to soon that there will not be enough data to make the graph.
 
+## credits
+
+-png tree
+
+-Freepik
+
 
 
