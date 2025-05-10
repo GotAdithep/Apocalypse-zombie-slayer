@@ -8,6 +8,8 @@
 
 4.seaborn: python -m pip install seaborn
 
+(or try pip install ...)
+
 ##  To start my game go to main.py and run the file.
 
 ###  The controlls are:
@@ -21,6 +23,8 @@ hold shift key to sprint
 press tab to open and close shop menu (main game will pause)
 
 click on skill tree icon to open skill tree shop and press esc to quit (main game will pause)
+
+right click to activate earthquake skill (10sec cool down)(you must unlock it from skill tree shop first)
 
 press 'i' to show graph gui which you can choose graph different graph types (main game will pause)
 
